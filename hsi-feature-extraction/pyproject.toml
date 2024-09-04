@@ -1,0 +1,35 @@
+[project]
+name = "hsi-feature-extraction"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "SuperHotDogCat", email = "siromisochan@gmail.com" }
+]
+dependencies = [
+    "black>=24.4.2",
+    "torch>=2.3.0",
+    "scikit-learn>=1.4.2",
+    "torchvision>=0.18.0",
+    "tqdm>=4.66.4",
+    "matplotlib>=3.8.4",
+    "segmentation-models-pytorch>=0.3.3",
+    "lightning>=2.3.1",
+    "pytest>=8.2.2",
+    "ruff>=0.5.5",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
