@@ -5,9 +5,9 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 from tqdm import trange
 import matplotlib.pyplot as plt
-from src.core.core import BaseFeatureExtractor
-from src.utils.consts import LIB_PARENT_PATH
-from src.utils.utils import retrieve_square_images
+from ..core.core import BaseFeatureExtractor
+from ..utils.consts import LIB_PARENT_PATH
+from ..utils.utils import retrieve_square_images
 
 """
 vifの実装をする https://github.com/NISL-MSU/HSI-BandSelection
