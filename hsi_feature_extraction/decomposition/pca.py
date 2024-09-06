@@ -1,7 +1,7 @@
 from typing import Union
 from sklearn.decomposition import PCA
 import numpy as np
-from src.core.core import BaseFeatureExtractor
+from ..core.core import BaseFeatureExtractor
 
 
 class PCAFeatureExtractor(BaseFeatureExtractor):

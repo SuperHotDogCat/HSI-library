@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.linear_model import Lasso
-from src.core.core import BaseFeatureExtractor
-from src.utils.utils import retrieve_square_images
+from ..core.core import BaseFeatureExtractor
+from ..utils.utils import retrieve_square_images
 
 
 """
