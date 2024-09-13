@@ -82,8 +82,7 @@ class LaplacianregularizedLowRankSubspaceClustering(BaseFeatureExtractor):
             HSI data: hyperspectral image data of shape (batch_size, num_bands_to_select, height, width).
         """
         if len(x.shape) == 3:
-            print("in laps", x[self.selected_bands, :, :].shape)
-            return x[self.selected_bands, :, :]
+            return x[self.selected_bands]
         return x[:, self.selected_bands, :, :]
 
     def select_bands(self, n_select: int) -> np.array:
