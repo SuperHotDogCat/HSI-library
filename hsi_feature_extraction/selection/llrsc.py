@@ -44,6 +44,7 @@ class LaplacianregularizedLowRankSubspaceClustering(BaseFeatureExtractor):
         self.p = p
         self.max_iter = max_iter
         self.tol = tol
+        self.num_bands_to_select = None
     
     def get_channels(self):
         """
