@@ -34,6 +34,13 @@ class EnhancedFastDensityPeakbasedClustering(BaseFeatureExtractor):
         Return:
             Transformed image(s) with only selected bands.
         """
+        if len(x.shape) == 3:
+            c, h, w = x.shape
+            d = self.cutoff / np.exp(self.num_bands_to_selsect / c)
+            selected_index, _ = self.transform_single(x, d)
+            selected_data = x[selected_index]
+            return selected_data
+        
         b, c, h, w = x.shape
         selected_data = np.zeros((b, self.num_bands_to_selsect, h, w))
         d = self.cutoff / np.exp(self.num_bands_to_selsect / c)
