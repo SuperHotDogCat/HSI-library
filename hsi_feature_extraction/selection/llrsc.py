@@ -81,7 +81,7 @@ class LaplacianregularizedLowRankSubspaceClustering(BaseFeatureExtractor):
         Returns:
             HSI data: hyperspectral image data of shape (batch_size, num_bands_to_select, height, width).
         """
-        if x.ndim == 3:
+        if len(x.shape) == 3:
             return x[self.selected_bands, :, :]
         return x[:, self.selected_bands, :, :]
 
