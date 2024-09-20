@@ -32,6 +32,12 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
 
     def get_channels(self,):
         return self.num_bands_to_select
+    
+    def fit(self, X: np.array) -> None:
+        if X.ndim == 3:
+            self.selected_bands=self._fit_single(X)
+        elif X.ndim == 4:
+            self._fit_batch(X)
 
         
     def transform(self, X: np.array) -> np.array:
@@ -52,10 +58,8 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
             ValueError: If X is not a 3D or 4D array.
         """
         if X.ndim == 3:
-            self.selected_bands=self._transform_single(X)
             return X[self.selected_bands,:,:]
         elif X.ndim == 4:
-            self._transform_batch(X)
             return X[:,self.selected_bands,:,:]
         else:
             raise ValueError(
@@ -64,7 +68,7 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
 
         
 
-    def _transform_single(self, X: np.array) -> np.array:
+    def _fit_single(self, X: np.array) -> np.array:
         """
         Perform band selection on a single hyperspectral image.
 
@@ -96,7 +100,7 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
 
         return selected_bands #X[self.selected_bands, :, :]
 
-    def _transform_batch(self, X: np.array) -> np.array:
+    def _fit_batch(self, X: np.array) -> None:
         """
         Perform band selection on a batch of hyperspectral images.
 
@@ -111,7 +115,7 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
         img_selected_bands = np.zeros((batch_size, self.num_bands_to_select), dtype=X.dtype)
 
         for i in range(batch_size):
-            img_selected_bands[i] = self._transform_single(X[i])
+            img_selected_bands[i] = self._fit_single(X[i])
 
         self.select_most_frequent(img_selected_bands)
         
