@@ -46,3 +46,11 @@ class BaseFeatureExtractor(ABC):
             None
         """
         pass
+    
+    @abstractmethod
+    def get_num_channels(self) -> int:
+        """
+        Returns:
+            the number of selected bands (channels) after transformation.
+        """
+        pass

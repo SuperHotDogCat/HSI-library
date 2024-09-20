@@ -6,7 +6,7 @@ from typing import List, Any, Dict, Tuple
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
-from src.decomposition.vae.base import BaseVAE
+from base import BaseVAE
 
 
 class SimpleVAE(BaseVAE):

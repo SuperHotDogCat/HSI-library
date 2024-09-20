@@ -10,8 +10,8 @@ import numpy as np
 from os import path
 import matplotlib.pyplot as plt
 from demo.data import retrieve_square_images
-from src.decomposition.vae.simple_vae import SimpleVAE
-from src.utils.consts import LIB_PARENT_PATH
+from simple_vae import SimpleVAE
+from hsi_feature_extraction.utils.consts import LIB_PARENT_PATH
 
 seed = 42
 np.random.seed(seed)

@@ -124,7 +124,7 @@ class VIFProcessor:
         table = np.zeros((n_hsi_channels, n_hsi_channels))
         for band in trange(n_hsi_channels):
             d = 1
-            vif_value = np.inf
+            vif_value = np.infty
             while vif_value > threshold and (band - d) > 0:
                 if table[band, band - d] == 0:
                     table[band, band - d] = self._calculate_pair_vif_value(
@@ -136,7 +136,7 @@ class VIFProcessor:
             distances_left[band] = d - 1
 
             d = 1
-            vif_value = np.inf
+            vif_value = np.infty
             while vif_value > threshold and (band + d) < n_hsi_channels:
                 if table[band, band + d] == 0:
                     table[band, band + d] = self._calculate_pair_vif_value(
