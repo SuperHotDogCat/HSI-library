@@ -2,6 +2,7 @@ from tqdm import tqdm
 import numpy as np
 from scipy import linalg
 from ..core.core import BaseFeatureExtractor
+from collections import Counter
 
 
 class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
@@ -21,15 +22,18 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
 
     """
 
-    def __init__(self, n_bands):
+    def __init__(self,num_bands_to_select):
         """
         Initialize the LCMV_CBS object.
-
         Args:
-            n_bands (int): Number of bands to select.
+            num_bands_to_select (int): Number of bands to select.
         """
-        self.n_bands = n_bands
+        self.num_bands_to_select = num_bands_to_select
 
+    def get_channels(self,):
+        return self.num_bands_to_select
+
+        
     def transform(self, X: np.array) -> np.array:
         """
         Perform band selection using the LCMV-CBS algorithm.
@@ -48,13 +52,17 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
             ValueError: If X is not a 3D or 4D array.
         """
         if X.ndim == 3:
-            return self._transform_single(X)
+            self.selected_bands=self._transform_single(X)
+            return X[self.selected_bands,:,:]
         elif X.ndim == 4:
-            return self._transform_batch(X)
+            self._transform_batch(X)
+            return X[:,self.selected_bands,:,:]
         else:
             raise ValueError(
                 "Input X must be a 3D array (single image) or 4D array (batch of images)."
             )
+
+        
 
     def _transform_single(self, X: np.array) -> np.array:
         """
@@ -83,10 +91,10 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
         # Compute band correlation measure
         bcm = np.sum(weights * R @ weights, axis=0)
 
-        # Select top n_bands
-        self.selected_bands = np.argsort(bcm)[::-1][: self.n_bands]
+        # Select top num_bands_to_select
+        selected_bands = np.argsort(bcm)[::-1][: self.num_bands_to_select]
 
-        return X[self.selected_bands, :, :]
+        return selected_bands #X[self.selected_bands, :, :]
 
     def _transform_batch(self, X: np.array) -> np.array:
         """
@@ -100,9 +108,18 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
 
         """
         batch_size, c, h, w = X.shape
-        img_selected_bands = np.zeros((batch_size, self.n_bands, h, w), dtype=X.dtype)
+        img_selected_bands = np.zeros((batch_size, self.num_bands_to_select), dtype=X.dtype)
 
         for i in range(batch_size):
             img_selected_bands[i] = self._transform_single(X[i])
 
-        return img_selected_bands
+        self.select_most_frequent(img_selected_bands)
+        
+
+    def select_most_frequent(self,matrix):
+        n=self.num_bands_to_select
+        flattened = matrix.flatten()
+        counter = Counter(flattened)
+        most_common = counter.most_common(n)
+        self.selected_bands_detail = sorted(most_common, key=lambda x: x[0])
+        self.selected_bands=[int(i[0])for i in self.selected_bands_detail]
