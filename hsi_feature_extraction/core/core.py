@@ -46,7 +46,7 @@ class BaseFeatureExtractor(ABC):
             None
         """
         pass
-    
+
     @abstractmethod
     def get_num_channels(self) -> int:
         """

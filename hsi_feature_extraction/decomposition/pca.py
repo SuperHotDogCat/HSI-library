@@ -52,3 +52,11 @@ class PCAFeatureExtractor(BaseFeatureExtractor):
         self.feature_extractor.fit(x)
         self.n_components = self.feature_extractor.n_components_
         return
+
+    def get_num_channels(self) -> int:
+        if not hasattr(self, "n_components"):
+            raise AttributeError(
+                "n_components property does not exist in the class."
+            )
+
+        return self.n_components

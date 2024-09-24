@@ -51,7 +51,9 @@ class EnhancedFastDensityPeakbasedClustering(BaseFeatureExtractor):
         )
         return selected_index, score
 
-    def applyEDPBC(self, D: np.array, k: int, dc: float) -> tuple[np.array, np.array]:
+    def applyEDPBC(
+        self, D: np.array, k: int, dc: float
+    ) -> tuple[np.array, np.array]:
         """
         Selects bands and computes labels based on a scaled similarity matrix.
 
@@ -133,3 +135,9 @@ class EnhancedFastDensityPeakbasedClustering(BaseFeatureExtractor):
 
         scaled_distance_matrix = np.sqrt(distance_matrix) / L
         return scaled_distance_matrix
+
+    def get_num_channels(
+        self,
+    ):
+        # 一旦パス
+        pass

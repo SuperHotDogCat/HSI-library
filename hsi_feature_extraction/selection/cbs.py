@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import numpy as np
 from scipy import linalg
-from src.core.core import BaseFeatureExtractor
+from ..core.core import BaseFeatureExtractor
 from collections import Counter
 
 
@@ -14,15 +14,15 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
     by Chein-I Chang and Su Wang. It supports batch processing of multiple images.
 
     paper:
-        Chein-I Chang and Su Wang, 
-        "Constrained band selection for hyperspectral imagery," 
-        in IEEE Transactions on Geoscience and Remote Sensing, 
+        Chein-I Chang and Su Wang,
+        "Constrained band selection for hyperspectral imagery,"
+        in IEEE Transactions on Geoscience and Remote Sensing,
         vol. 44, no. 6, pp. 1575-1585, June 2006, doi: 10.1109/TGRS.2006.864389.
         https://ieeexplore.ieee.org/document/1634721
 
     """
 
-    def __init__(self,num_bands_to_select):
+    def __init__(self, num_bands_to_select):
         """
         Initialize the LCMV_CBS object.
         Args:
@@ -30,16 +30,21 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
         """
         self.num_bands_to_select = num_bands_to_select
 
-    def get_channels(self,):
+    def get_num_channels(
+        self,
+    ):
+        if hasattr(self, "num_bands_to_select"):
+            raise AttributeError(
+                "num_bands_to_select property does not exist in the class."
+            )
         return self.num_bands_to_select
-    
+
     def fit(self, X: np.array) -> None:
         if X.ndim == 3:
-            self.selected_bands=self._fit_single(X)
+            self.selected_bands = self._fit_single(X)
         elif X.ndim == 4:
             self._fit_batch(X)
 
-        
     def transform(self, X: np.array) -> np.array:
         """
         Perform band selection using the LCMV-CBS algorithm.
@@ -58,15 +63,13 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
             ValueError: If X is not a 3D or 4D array.
         """
         if X.ndim == 3:
-            return X[self.selected_bands,:,:]
+            return X[self.selected_bands, :, :]
         elif X.ndim == 4:
-            return X[:,self.selected_bands,:,:]
+            return X[:, self.selected_bands, :, :]
         else:
             raise ValueError(
                 "Input X must be a 3D array (single image) or 4D array (batch of images)."
             )
-
-        
 
     def _fit_single(self, X: np.array) -> np.array:
         """
@@ -98,7 +101,7 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
         # Select top num_bands_to_select
         selected_bands = np.argsort(bcm)[::-1][: self.num_bands_to_select]
 
-        return selected_bands #X[self.selected_bands, :, :]
+        return selected_bands  # X[self.selected_bands, :, :]
 
     def _fit_batch(self, X: np.array) -> None:
         """
@@ -112,18 +115,19 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
 
         """
         batch_size, c, h, w = X.shape
-        img_selected_bands = np.zeros((batch_size, self.num_bands_to_select), dtype=X.dtype)
+        img_selected_bands = np.zeros(
+            (batch_size, self.num_bands_to_select), dtype=X.dtype
+        )
 
         for i in range(batch_size):
             img_selected_bands[i] = self._fit_single(X[i])
 
         self.select_most_frequent(img_selected_bands)
-        
 
-    def select_most_frequent(self,matrix):
-        n=self.num_bands_to_select
+    def select_most_frequent(self, matrix):
+        n = self.num_bands_to_select
         flattened = matrix.flatten()
         counter = Counter(flattened)
         most_common = counter.most_common(n)
         self.selected_bands_detail = sorted(most_common, key=lambda x: x[0])
-        self.selected_bands=[int(i[0])for i in self.selected_bands_detail]
+        self.selected_bands = [int(i[0]) for i in self.selected_bands_detail]

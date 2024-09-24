@@ -54,7 +54,7 @@ class LassoExtractor(BaseFeatureExtractor):
 
         """
         # (B, C, H, W) -> (B*C*H, C, 1, 1)　to perform Lasso regression for the channel dimension
-        x, y = retrieve_square_images(1, data[0], gt[0]) 
+        x, y = retrieve_square_images(1, data[0], gt[0])
         for i in range(1, num_batches):
             tmp_x, tmp_y = retrieve_square_images(1, data[i], gt[i])
 
@@ -67,6 +67,7 @@ class LassoExtractor(BaseFeatureExtractor):
         y = y.reshape(b, -1)
 
         self.feature_extractor.fit(x, y)
+        self.n_channels = self.feature_extractor.n_features_in_
 
         if n > 0:
             x = self.feature_extractor.coef_
@@ -76,6 +77,13 @@ class LassoExtractor(BaseFeatureExtractor):
             self.selected_indices = sorted_indices[:n].astype(np.float32)
 
         else:
-            self.selected_indices = np.where(self.feature_extractor.coef_ != 0)[
-                0
-            ].astype(np.float32)
+            self.selected_indices = np.where(
+                self.feature_extractor.coef_ != 0
+            )[0].astype(np.float32)
+
+    def get_num_channels(self) -> int:
+        if hasattr(self, "n_channels"):
+            raise AttributeError(
+                "n_channels property does not exist in the class."
+            )
+        return self.n_channels

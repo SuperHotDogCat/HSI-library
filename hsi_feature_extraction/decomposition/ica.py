@@ -55,3 +55,11 @@ class ICAFeatureExtractor(BaseFeatureExtractor):
         self.feature_extractor.fit(x)
         _, self.n_components = self.feature_extractor.components_.shape
         return
+
+    def get_num_channels(self) -> int:
+        if not hasattr(self, "n_components"):
+            raise AttributeError(
+                "n_components property does not exist in the class."
+            )
+
+        return self.n_components

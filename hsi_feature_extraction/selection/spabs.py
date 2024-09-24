@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Tuple, List, Union
 from tqdm import tqdm
-from src.core.core import BaseFeatureExtractor
+from ..core.core import BaseFeatureExtractor
 
 
 class SpaBS(BaseFeatureExtractor):
@@ -11,20 +11,12 @@ class SpaBS(BaseFeatureExtractor):
     This class implements the SpaBS algorithm, which uses K-SVD to obtain a sparse
     representation of hyperspectral image data and selects the most important bands
     based on the sparsity of the coefficients.
-
-    Paper:
-        S. Li and H. Qi, 
-        "Sparse representation based band selection for hyperspectral images,"
-        2011 18th IEEE International Conference on Image Processing, 
-        Brussels, Belgium, 2011, pp. 2693-2696, doi: 10.1109/ICIP.2011.6116223.
-        https://ieeexplore.ieee.org/document/6116223
-
     """
 
     def __init__(
         self,
+        sparsity_level: float,
         num_bands_to_select: int,
-        sparsity_level: float =0.05,
         max_iter: int = 30,
         tol: float = 1e-6,
     ):
@@ -32,20 +24,16 @@ class SpaBS(BaseFeatureExtractor):
         Initialize the SpaBS band selector.
 
         Args:
-            num_bands_to_select: The number of bands to select.
             sparsity_level: The desired sparsity level, between 0 and 1.
+            num_bands_to_select: The number of bands to select.
             max_iter: Maximum number of iterations for K-SVD algorithm. Defaults to 30.
             tol: Tolerance for convergence in K-SVD algorithm. Defaults to 1e-6.
         """
         self.sparsity_level = sparsity_level
+        self.num_bands_to_select = num_bands_to_select
         self.max_iter = max_iter
         self.tol = tol
         self.selected_bands = None
-        self.num_bands_to_select = num_bands_to_select
-
-     def get_channels(self):
-        return self.num_bands_to_select
-        
 
     def fit(self, Y: np.ndarray) -> None:
         """
@@ -86,7 +74,9 @@ class SpaBS(BaseFeatureExtractor):
         hist = np.bincount(X_s.flatten(), minlength=C)
 
         # Select top K bands based on histogram
-        self.selected_bands = np.sort(np.argsort(-hist)[: self.num_bands_to_select])
+        self.selected_bands = np.sort(
+            np.argsort(-hist)[: self.num_bands_to_select]
+        )
 
     def transform(self, Y: np.ndarray) -> np.ndarray:
         """
@@ -122,6 +112,13 @@ class SpaBS(BaseFeatureExtractor):
     def _transform_single(self, Y: np.ndarray) -> np.ndarray:
         return Y[self.selected_bands, :, :]
 
+    def get_num_channels(self) -> int:
+        if hasattr(self, "selected_bands"):
+            raise AttributeError(
+                "selected_bands property does not exist in the class."
+            )
+        return len(self.selected_bands)
+
 
 class KSVD:
     """
@@ -131,7 +128,9 @@ class KSVD:
     to approximate input data as a linear combination of a few basis vectors (dictionary).
     """
 
-    def __init__(self, n_components: int, max_iter: int = 30, tol: float = 1e-6):
+    def __init__(
+        self, n_components: int, max_iter: int = 30, tol: float = 1e-6
+    ):
         """
         Initializes the KSVD class.
 
@@ -191,7 +190,9 @@ class KSVD:
 
         return dictionary, sparse_codes
 
-    def _update_sparse_codes(self, X: np.ndarray, dictionary: np.ndarray) -> np.ndarray:
+    def _update_sparse_codes(
+        self, X: np.ndarray, dictionary: np.ndarray
+    ) -> np.ndarray:
         """
         Updates sparse codes using the Orthogonal Matching Pursuit (OMP) algorithm.
 
@@ -215,7 +216,9 @@ class KSVD:
                 support.append(index)
 
                 D_support = dictionary[:, support]
-                x_support, _, _, _ = np.linalg.lstsq(D_support, X[:, i], rcond=None)
+                x_support, _, _, _ = np.linalg.lstsq(
+                    D_support, X[:, i], rcond=None
+                )
 
                 residual = X[:, i] - np.dot(D_support, x_support)
 

@@ -35,11 +35,13 @@ def sampling_square_image(
 ) -> tuple[np.array, Optional[np.array]]:
     # retrieve_square_imagesの二重ループでやっている処理をDataset Classの__getitem__で呼び出し, 1枚1枚切り出すように変更した関数
     H, W, C = hsi_image.shape
-    i = index // (W - n + 1) # indexは0<=index<=(W - n + 1)(H - n)の値を取るので0<=i<=(H - n)
-    j = index % (W - n + 1) # 0<=j<=(W-n)
+    i = index // (
+        W - n + 1
+    )  # indexは0<=index<=(W - n + 1)(H - n)の値を取るので0<=i<=(H - n)
+    j = index % (W - n + 1)  # 0<=j<=(W-n)
     if label is None:
         hsi_image[i : i + n, j : j + n, :], None
     return (
-        hsi_image[i : i + n, j : j + n, :], # n×nの画像を切り出す
+        hsi_image[i : i + n, j : j + n, :],  # n×nの画像を切り出す
         label[i : i + n, j : j + n],
     )

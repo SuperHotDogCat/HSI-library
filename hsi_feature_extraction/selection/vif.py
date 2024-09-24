@@ -68,7 +68,12 @@ class VIFExtractor(BaseFeatureExtractor):
         )
         self.local_minimum_indexes = local_minimum_indexes
         self.distance_distributions = distance_distributions
-    def get_channels(self):
+
+    def get_num_channels(self):
+        if hasattr(self, "local_minimum_indexes"):
+            raise AttributeError(
+                "local_minimum_indexes property does not exist in the class."
+            )
         return len(self.local_minimum_indexes)
 
 
