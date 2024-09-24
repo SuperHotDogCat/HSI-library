@@ -82,7 +82,7 @@ class LassoExtractor(BaseFeatureExtractor):
             )[0].astype(np.float32)
 
     def get_num_channels(self) -> int:
-        if hasattr(self, "n_channels"):
+        if not hasattr(self, "n_channels"):
             raise AttributeError(
                 "n_channels property does not exist in the class."
             )

@@ -33,7 +33,7 @@ class LinearlyConstrainedMinimumVarianceCBS(BaseFeatureExtractor):
     def get_num_channels(
         self,
     ):
-        if hasattr(self, "num_bands_to_select"):
+        if not hasattr(self, "num_bands_to_select"):
             raise AttributeError(
                 "num_bands_to_select property does not exist in the class."
             )
