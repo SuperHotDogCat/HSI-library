@@ -60,7 +60,6 @@ class ICAFeatureExtractor(BaseFeatureExtractor):
         B, C, H, W = x.shape
         x = x.transpose(0, 2, 3, 1).reshape(-1, C)
         self.feature_extractor.fit(x)
-        _, self.n_components = self.feature_extractor.components_.shape
         return
 
     def get_num_channels(self) -> int:
