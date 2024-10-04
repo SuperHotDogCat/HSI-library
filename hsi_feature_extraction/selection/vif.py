@@ -1,13 +1,8 @@
-from typing import List
-from os import path
 from sklearn.metrics import r2_score
 from sklearn.linear_model import LinearRegression
 import numpy as np
 from tqdm import trange
-import matplotlib.pyplot as plt
 from ..core.core import BaseFeatureExtractor
-from ..utils.consts import LIB_PARENT_PATH
-from ..utils.utils import retrieve_square_images
 
 """
 vifの実装をする https://github.com/NISL-MSU/HSI-BandSelection
@@ -70,7 +65,7 @@ class VIFExtractor(BaseFeatureExtractor):
         self.distance_distributions = distance_distributions
 
     def get_num_channels(self):
-        if hasattr(self, "local_minimum_indexes"):
+        if not hasattr(self, "local_minimum_indexes"):
             raise AttributeError(
                 "local_minimum_indexes property does not exist in the class."
             )
@@ -129,7 +124,7 @@ class VIFProcessor:
         table = np.zeros((n_hsi_channels, n_hsi_channels))
         for band in trange(n_hsi_channels):
             d = 1
-            vif_value = np.infty
+            vif_value = np.inf
             while vif_value > threshold and (band - d) > 0:
                 if table[band, band - d] == 0:
                     table[band, band - d] = self._calculate_pair_vif_value(
@@ -141,7 +136,7 @@ class VIFProcessor:
             distances_left[band] = d - 1
 
             d = 1
-            vif_value = np.infty
+            vif_value = np.inf
             while vif_value > threshold and (band + d) < n_hsi_channels:
                 if table[band, band + d] == 0:
                     table[band, band + d] = self._calculate_pair_vif_value(

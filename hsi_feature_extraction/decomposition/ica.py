@@ -37,9 +37,10 @@ class ICAFeatureExtractor(BaseFeatureExtractor):
             np.array: Transformed data with shape (B, n_components).
         """
         B, C, H, W = x.shape
-        x = x.reshape(B, C * H * W)
+        x = x.transpose(0, 2, 3, 1).reshape(-1, C)
         x_transformed = self.feature_extractor.transform(x)
-        return x_transformed
+        x = x_transformed.reshape(B, H, W, -1).transpose(0, 3, 1, 2)
+        return x
 
     def fit(self, x: np.array):
         """Fits the ICA model to the input data.
@@ -51,7 +52,7 @@ class ICAFeatureExtractor(BaseFeatureExtractor):
             None
         """
         B, C, H, W = x.shape
-        x = x.reshape(B, C * H * W)
+        x = x.transpose(0, 2, 3, 1).reshape(-1, C)
         self.feature_extractor.fit(x)
         _, self.n_components = self.feature_extractor.components_.shape
         return

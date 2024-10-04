@@ -1,7 +1,4 @@
 import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mutual_info_score
 from src.core.core import BaseFeatureExtractor
 
 
@@ -75,18 +72,23 @@ class EnhancedFastDensityPeakbasedClustering(BaseFeatureExtractor):
             local_density[i] = np.sum(np.exp(-((D[i, :] / dc) ** 2)))
 
         # Sort local_density in descending order
-        I = np.argsort(-local_density)
+        argmin_local_density = np.argsort(-local_density)
 
         # Calculate δ for each band
         δ = np.zeros(L)
-        δ[I[0]] = -1  # δI1 = -1
+        δ[argmin_local_density[0]] = -1  # δI1 = -1
         for i in range(1, L):
-            δ[I[i]] = np.max(D[I[i], :])
+            δ[argmin_local_density[i]] = np.max(D[argmin_local_density[i], :])
             for j in range(i):
-                if D[I[i], I[j]] < δ[I[i]]:
-                    δ[I[i]] = D[I[i], I[j]]
+                if (
+                    D[argmin_local_density[i], argmin_local_density[j]]
+                    < δ[argmin_local_density[i]]
+                ):
+                    δ[argmin_local_density[i]] = D[
+                        argmin_local_density[i], argmin_local_density[j]
+                    ]
 
-        δ[I[0]] = np.max(δ)
+        δ[argmin_local_density[0]] = np.max(δ)
 
         # Normalize local_density and δ
         local_density_min, local_density_max = np.min(local_density), np.max(
@@ -103,15 +105,15 @@ class EnhancedFastDensityPeakbasedClustering(BaseFeatureExtractor):
         score = local_density_normalized * δ_normalized**2
 
         # Sort score in descending order
-        I = np.argsort(-score)
+        argmin_indexes = np.argsort(-score)
 
         # Get the indexes of the selected bands
-        C = I[:k]
+        C = argmin_indexes[:k]
 
         # Compute the labels for each band
         A = np.zeros(L)
         for i in range(L):
-            j = I[i]
+            j = argmin_indexes[i]
             A[i] = np.min(D[C, j])
 
         return C, A

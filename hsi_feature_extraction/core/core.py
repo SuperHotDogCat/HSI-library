@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 import numpy as np
 
 
@@ -42,6 +41,7 @@ class BaseFeatureExtractor(ABC):
         Optional method. Developers should implement the method if necessary.
         Args:
             args: Variable length arguments. You can add anything you think it necessary for the fit method.
+            The shape of the inputs is (Batch, Channels, Height, Width).
         Returns:
             None
         """

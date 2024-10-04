@@ -1,4 +1,3 @@
-from typing import Union
 from sklearn.decomposition import PCA
 import numpy as np
 from ..core.core import BaseFeatureExtractor
@@ -31,9 +30,10 @@ class PCAFeatureExtractor(BaseFeatureExtractor):
             x_transformed: np.array, the shape is 2-dimensional.
         """
         B, C, H, W = x.shape
-        x = x.reshape(B, C * H * W)
+        x = x.transpose(0, 2, 3, 1).reshape(-1, C)
         x_transformed = self.feature_extractor.transform(x)
-        return x_transformed
+        x = x_transformed.reshape(B, H, W, -1).transpose(0, 3, 1, 2)
+        return x
 
     def fit(self, x: np.array):
         """
@@ -48,7 +48,7 @@ class PCAFeatureExtractor(BaseFeatureExtractor):
             None
         """
         B, C, H, W = x.shape
-        x = x.reshape(B, C * H * W)
+        x = x.transpose(0, 2, 3, 1).reshape(-1, C)
         self.feature_extractor.fit(x)
         self.n_components = self.feature_extractor.n_components_
         return

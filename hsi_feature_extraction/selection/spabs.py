@@ -1,5 +1,4 @@
 import numpy as np
-from typing import Tuple, List, Union
 from tqdm import tqdm
 from ..core.core import BaseFeatureExtractor
 
@@ -35,21 +34,21 @@ class SpaBS(BaseFeatureExtractor):
         self.tol = tol
         self.selected_bands = None
 
-    def fit(self, Y: np.ndarray) -> None:
+    def fit(self, X: np.ndarray) -> None:
         """
         Fit the band selector on a batch of hyperspectral images.
 
         Args:
-            Y: Batch of hyperspectral image data. Shape: (B, C, H, W) where B is the batch size,
+            X: Batch of hyperspectral image data. Shape: (B, C, H, W) where B is the batch size,
                C is the number of channels (bands), H is the height, and W is the width.
 
         Returns:
             self: The fitted SpaBSBandSelector object.
         """
-        if Y.ndim != 4:
+        if X.ndim != 4:
             raise ValueError("Y must be a 4D array with shape (B, C, H, W)")
 
-        B, C, H, W = Y.shape
+        B, C, H, W = X.shape
 
         if not 0 < self.sparsity_level < 1:
             raise ValueError("sparsity_level must be between 0 and 1")
@@ -61,11 +60,11 @@ class SpaBS(BaseFeatureExtractor):
         K = int(self.sparsity_level * C)
 
         # Reshape batch to (C, B*H*W)
-        Y_reshaped = Y.transpose(1, 0, 2, 3).reshape(C, -1)
+        X_reshaped = X.transpose(1, 0, 2, 3).reshape(C, -1)
 
         # Apply K-SVD
         ksvd = KSVD(n_components=C, max_iter=self.max_iter, tol=self.tol)
-        _, X = ksvd.fit(Y_reshaped)
+        _, X = ksvd.fit(X_reshaped)
 
         # Select top K entries for each column
         X_s = np.argsort(-np.abs(X), axis=0)[:K, :]
@@ -113,7 +112,7 @@ class SpaBS(BaseFeatureExtractor):
         return Y[self.selected_bands, :, :]
 
     def get_num_channels(self) -> int:
-        if hasattr(self, "selected_bands"):
+        if not hasattr(self, "selected_bands"):
             raise AttributeError(
                 "selected_bands property does not exist in the class."
             )

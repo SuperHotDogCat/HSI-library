@@ -171,11 +171,11 @@ class LaplacianregularizedLowRankSubspaceClustering(BaseFeatureExtractor):
         Returns:
             np.ndarray: Updated representation coefficient matrix C.
         """
-        I = np.eye(self.n_channels)
+        identity_matrix = np.eye(self.n_channels)
         X = self.X[image_index]
-        return np.linalg.inv(self.lambda_param * X @ X.T + 2 * I) @ (
-            self.lambda_param * X @ X.T + Z + D1 + A + D2
-        )
+        return np.linalg.inv(
+            self.lambda_param * X @ X.T + 2 * identity_matrix
+        ) @ (self.lambda_param * X @ X.T + Z + D1 + A + D2)
 
     def _update_z(self, C, D1):
         """

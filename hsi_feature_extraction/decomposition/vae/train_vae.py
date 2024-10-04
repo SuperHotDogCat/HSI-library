@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 from tqdm import tqdm
 from torch.utils.data import (
     TensorDataset,
@@ -136,7 +135,6 @@ def main():
         all_dataset, [train_size, val_size, test_size]
     )
     device = "cuda"
-    image_size = (n, n)
     vae = SimpleVAE((200, n, n), 256, 64).to(
         device
     )  # 特徴量, 分類クラス数, 中間のチャンネル数

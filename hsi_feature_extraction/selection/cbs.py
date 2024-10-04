@@ -1,4 +1,3 @@
-from tqdm import tqdm
 import numpy as np
 from scipy import linalg
 from ..core.core import BaseFeatureExtractor
