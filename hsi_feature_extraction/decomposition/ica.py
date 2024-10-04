@@ -36,6 +36,12 @@ class ICAFeatureExtractor(BaseFeatureExtractor):
         Returns:
             np.array: Transformed data with shape (B, n_components).
         """
+        if x.ndim == 3:
+            C, H, W = x.shape
+            x = x.transpose(1, 2, 0).reshape(-1, C)
+            x_transformed = self.feature_extractor.transform(x)
+            x = x_transformed.reshape(H, W, -1).transpose(2, 0, 1)
+            return x
         B, C, H, W = x.shape
         x = x.transpose(0, 2, 3, 1).reshape(-1, C)
         x_transformed = self.feature_extractor.transform(x)
