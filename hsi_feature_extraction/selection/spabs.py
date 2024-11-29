@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from ..core.core import BaseFeatureExtractor
-
+from joblib import Parallel, delayed
 
 class SpaBS(BaseFeatureExtractor):
     """
@@ -155,6 +155,7 @@ class KSVD:
                 - Learned dictionary of shape (n_features, n_components).
                 - Corresponding sparse codes of shape (n_components, n_samples).
         """
+        np.random.seed(42)
         n_features, n_samples = X.shape
         dictionary = np.random.randn(n_features, self.n_components)
         dictionary /= np.linalg.norm(dictionary, axis=0, keepdims=True)
@@ -189,11 +190,9 @@ class KSVD:
 
         return dictionary, sparse_codes
 
-    def _update_sparse_codes(
-        self, X: np.ndarray, dictionary: np.ndarray
-    ) -> np.ndarray:
+    def _update_sparse_codes(self, X: np.ndarray, dictionary: np.ndarray) -> np.ndarray:
         """
-        Updates sparse codes using the Orthogonal Matching Pursuit (OMP) algorithm.
+        Updates sparse codes using the Orthogonal Matching Pursuit (OMP) algorithm with parallelization.
 
         Args:
             X: Input data matrix of shape (n_features, n_samples).
@@ -203,10 +202,10 @@ class KSVD:
             Updated sparse codes of shape (n_components, n_samples).
         """
 
-        n_samples = X.shape[1]
-        sparse_codes = np.zeros((self.n_components, n_samples))
-
-        for i in tqdm(range(n_samples)):
+        def omp_single_sample(i):
+            """
+            Performs OMP for a single sample.
+            """
             residual = X[:, i]
             support = []
             for _ in range(self.n_components):
@@ -215,15 +214,24 @@ class KSVD:
                 support.append(index)
 
                 D_support = dictionary[:, support]
-                x_support, _, _, _ = np.linalg.lstsq(
-                    D_support, X[:, i], rcond=None
-                )
+                x_support, _, _, _ = np.linalg.lstsq(D_support, X[:, i], rcond=None)
 
                 residual = X[:, i] - np.dot(D_support, x_support)
 
                 if np.linalg.norm(residual) < 1e-6:
                     break
 
+            return support, x_support
+
+        n_samples = X.shape[1]
+        sparse_codes = np.zeros((self.n_components, n_samples))
+
+        # 並列処理の実行
+        results = Parallel(n_jobs=-1)(delayed(omp_single_sample)(i) for i in tqdm(range(n_samples)))
+
+        # 結果を sparse_codes に反映
+        for i, (support, x_support) in enumerate(results):
             sparse_codes[support, i] = x_support
 
         return sparse_codes
+
